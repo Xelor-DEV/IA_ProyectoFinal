@@ -20,7 +20,23 @@ MonoBehaviour:
       parentIndex: 
       startIndex: 
       variableStartIndex: 
-      JSONSerialization: 
+      JSONSerialization: '{"EntryTask":{"Type":"BehaviorDesigner.Runtime.Tasks.EntryTask","NodeData":{"Offset":"(674.5319,98.08511)"},"ID":0,"Name":"Entry","Instant":true},"RootTask":{"Type":"BehaviorDesigner.Runtime.Tasks.Repeater","NodeData":{"Offset":"(4.53192139,118.085114)"},"ID":1,"Name":"Repeater","Instant":true,"SharedIntcount":{"Type":"BehaviorDesigner.Runtime.SharedInt","Name":null,"Int32mValue":0},"SharedBoolrepeatForever":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":null,"BooleanmValue":false},"SharedBoolendOnFailure":{"Type":"BehaviorDesigner.Runtime.SharedBool","Name":null,"BooleanmValue":true},"Children":[{"Type":"BehaviorDesigner.Runtime.Tasks.Selector","NodeData":{"Offset":"(4.53192139,130.085114)"},"ID":2,"Name":"Selector","Instant":true,"AbortTypeabortType":"None","Children":[{"Type":"BehaviorDesigner.Runtime.Tasks.Sequence","NodeData":{"Offset":"(-967.822632,172.723373)"},"ID":3,"Name":"Sequence","Instant":true,"AbortTypeabortType":"None","Children":[{"Type":"ActionDestroy","NodeData":{"Offset":"(-18.753788,123.085083)"},"ID":4,"Name":"Action
+        Destroy","Instant":true}]},{"Type":"BehaviorDesigner.Runtime.Tasks.Sequence","NodeData":{"Offset":"(-652.375854,167.085083)"},"ID":5,"Name":"Sequence","Instant":true,"AbortTypeabortType":"None","Children":[{"Type":"ActionNodeNotViewEntity","NodeData":{"Offset":"(-122.753784,117.085083)"},"ID":6,"Name":"Action
+        Node Not View Entity","Instant":true},{"Type":"ActionNodeWander","NodeData":{"Offset":"(74.2462158,119.085083)"},"ID":7,"Name":"Action
+        Node Wander","Instant":true}]},{"Type":"BehaviorDesigner.Runtime.Tasks.Sequence","NodeData":{"Offset":"(-82.80136,165.085083)"},"ID":8,"Name":"Sequence","Instant":true,"AbortTypeabortType":"None","Children":[{"Type":"ActionNodeViewEntity","NodeData":{"Offset":"(-328.0515,118.085083)"},"ID":9,"Name":"Action
+        Node View Entity","Instant":true},{"Type":"ActionPlayerDetected","NodeData":{"Offset":"(-113.498428,118.446793)"},"ID":10,"Name":"Action
+        Player Detected","Instant":true},{"Type":"ActionNodeNotInRangeAttack","NodeData":{"Offset":"(91.09732,119.127686)"},"ID":11,"Name":"Action
+        Node Not In Range Attack","Instant":true},{"Type":"ActionNodeArriveObjective","NodeData":{"Offset":"(318.756836,123.383057)"},"ID":12,"Name":"Action
+        Node Arrive Objective","Instant":true}]},{"Type":"BehaviorDesigner.Runtime.Tasks.Sequence","NodeData":{"Offset":"(631.99585,181.297119)"},"ID":13,"Name":"Sequence","Instant":true,"AbortTypeabortType":"None","Children":[{"Type":"ActionNodeViewEntity","NodeData":{"Offset":"(-178.95578,120.665527)"},"ID":14,"Name":"Action
+        Node View Entity","Instant":true},{"Type":"ActionObjectiveDetected","NodeData":{"Offset":"(21.3723526,122.500427)"},"ID":15,"Name":"Action
+        Objective Detected","Instant":true},{"Type":"ActionInRangeAttack","NodeData":{"Offset":"(208.844971,120.440979)"},"ID":16,"Name":"Action
+        In Range Attack","Instant":true},{"Type":"ActionNodeAttack","NodeData":{"Offset":"(373.844971,115.682556)"},"ID":17,"Name":"Action
+        Node Attack","Instant":true}]},{"Type":"BehaviorDesigner.Runtime.Tasks.Sequence","NodeData":{"Offset":"(1255.9375,181.573837)"},"ID":18,"Name":"Sequence","Instant":true,"AbortTypeabortType":"None","Children":[{"Type":"ActionNodeViewEntity","NodeData":{"Offset":"(-88.91077,127.331421)"},"ID":19,"Name":"Action
+        Node View Entity","Instant":true},{"Type":"ActionObjectiveDetected","NodeData":{"Offset":"(98.96753,142.483154)"},"ID":20,"Name":"Action
+        Objective Detected","Instant":true},{"Type":"ActionInRangeAttack","NodeData":{"Offset":"(283.81665,136.422485)"},"ID":21,"Name":"Action
+        In Range Attack","Instant":true},{"Type":"ActionDestroy","NodeData":{"Offset":"(426.2417,136.4226)"},"ID":22,"Name":"Action
+        Destroy","Instant":true},{"Type":"ActionInstantiateTarr","NodeData":{"Offset":"(577.7571,143.998291)"},"ID":23,"Name":"Action
+        Instantiate Tarr","Instant":true}]}]}]}}'
       fieldSerializationData:
         typeName: []
         fieldNameHash: 
@@ -29,4 +45,4 @@ MonoBehaviour:
         unityObjects: []
         byteData: 
         byteDataArray: 
-      Version: 
+      Version: 1.7.12
