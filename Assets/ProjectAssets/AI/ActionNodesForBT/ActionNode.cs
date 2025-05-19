@@ -6,13 +6,11 @@ using Unity.VisualScripting;
 [TaskCategory("MyAI/BaseClass")]
 public class ActionNode : Action
 {
+    protected HealthManager healthManager;
 
-    protected AICharacterVehicle _IACharacterVehiculo;
-    protected AICharacterAction _IACharacterActions;
     public override void OnStart()
     {
         base.OnStart();
-        _IACharacterVehiculo = GetComponent<AICharacterVehicle>();
-        _IACharacterActions = GetComponent<AICharacterAction>();
+        healthManager = gameObject.GetComponent<HealthManager>();
     }
 }

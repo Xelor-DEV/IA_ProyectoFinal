@@ -1,16 +1,31 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 public class AICharacterControl : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public NavMeshAgent Agent { get; protected set; }
+    public HealthManager Health { get; protected set; }
+    public AIEye AIEye { get; protected set; }
+
+    protected virtual void Awake()
     {
-        
+        LoadComponent();
     }
 
-    // Update is called once per frame
-    void Update()
+    protected virtual void Start()
     {
-        
+
+    }
+
+    protected virtual void Update()
+    {
+
+    }
+
+    public virtual void LoadComponent()
+    {
+        Agent = GetComponent<NavMeshAgent>();
+        Health = GetComponent<HealthManager>();
+        AIEye = GetComponent<AIEye>();
     }
 }

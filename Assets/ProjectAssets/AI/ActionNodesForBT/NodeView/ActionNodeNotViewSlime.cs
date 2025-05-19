@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using BehaviorDesigner.Runtime.Tasks;
 [TaskCategory("MyAI/View")]
-public class ActionNodeNotDetectSlime : ActionNodeView
+public class ActionNodeNotViewSlime : ActionNodeView
 {
     public override void OnStart()
     {
