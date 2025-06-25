@@ -267,6 +267,7 @@ public class AIEye : MonoBehaviour
     #region Scan Logic
     protected virtual void Update()
     {
+        if (linkedHealth == null) return;
         UpdateScanTimer();
         HandleEnemyState();
     }
