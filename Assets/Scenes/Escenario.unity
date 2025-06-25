@@ -11569,6 +11569,7 @@ GameObject:
   - component: {fileID: 613910944}
   - component: {fileID: 613910943}
   - component: {fileID: 613910948}
+  - component: {fileID: 613910950}
   - component: {fileID: 613910947}
   - component: {fileID: 613910946}
   - component: {fileID: 613910949}
@@ -11723,6 +11724,41 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   actionsSlime: {fileID: 613910947}
+--- !u!114 &613910950
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 613910942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b4d219e2cb7ced4db101dc1be90010b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _mainVision:
+    visionAngle: 30
+    visionHeight: 1
+    maxDetectionDistance: 10
+    scanLayers:
+      serializedVersion: 2
+      m_Bits: 0
+    outOfSightColor: {r: 1, g: 0, b: 0, a: 1}
+    drawGizmos: 0
+    owner: {fileID: 0}
+    _occlusionLayers:
+      serializedVersion: 2
+      m_Bits: 0
+    _checkInsideObjects: 1
+    _inSightColor: {r: 0, g: 1, b: 0, a: 1}
+  _minScanInterval: 1
+  _maxScanInterval: 1
+  _detectedEnemy: {fileID: 0}
+  _detectedAlly: {fileID: 0}
+  _currentTarget: {x: 0, y: 0, z: 0}
+  _enemiesInView: 0
+  linkedHealth: {fileID: 0}
+  _aimOffset: {fileID: 0}
 --- !u!1001 &615734549
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -26792,6 +26828,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 528974422}
+  - {fileID: 1538617383}
   m_Father: {fileID: 1839081399}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1444708281
@@ -27538,7 +27575,7 @@ Transform:
   m_GameObject: {fileID: 1538617382}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 200, y: 0, z: 200}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -27549,7 +27586,7 @@ Transform:
   - {fileID: 459690342}
   - {fileID: 1733330691}
   - {fileID: 2102935743}
-  m_Father: {fileID: 1839081399}
+  m_Father: {fileID: 1444708280}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1540775326 stripped
 Transform:
@@ -30940,7 +30977,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1444708280}
-  - {fileID: 1538617383}
   - {fileID: 1772676231}
   - {fileID: 93503675}
   - {fileID: 789457872}
