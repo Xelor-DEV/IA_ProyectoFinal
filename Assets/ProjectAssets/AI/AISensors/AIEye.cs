@@ -350,7 +350,7 @@ public class AIEye : MonoBehaviour
 
     protected virtual bool IsAlly(HealthManager target)
     {
-        return linkedHealth.AlliedFactions.Contains(target.Faction);
+        return linkedHealth.AlliedEntityGroups.Contains(target.EntityGroup);
     }
 
     private void HandleEnemyState()

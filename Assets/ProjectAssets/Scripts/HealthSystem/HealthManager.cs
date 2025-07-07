@@ -3,18 +3,18 @@ using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 
-public enum FactionType 
-{ 
-    A, 
-    B, 
-    C, 
-    D, 
-    E 
+public enum EntityGroup
+{
+    Friendly_Slime,
+    Hostile_Slime, 
+    Human
 }
-public enum AgentType 
+
+public enum EntityType 
 { 
-    Slime, 
-    Tarr, 
+    PinkSlime, 
+    Tarr,
+    RancherBot,
     None
 }
 
@@ -22,21 +22,27 @@ public class HealthManager : MonoBehaviour
 {
     #region Health Settings
     [Header("Health Configuration")]
-    [SerializeField] private int maxHealth = 100;
-    [SerializeField] private int currentHealth;
+    [SerializeField] private float maxHealth = 100;
+    [SerializeField] private float currentHealth;
     [SerializeField] private bool isImmortal = false;
-    public bool IsDead => currentHealth <= 0;
+    public bool IsDead
+    {
+        get
+        {
+            return currentHealth <= 0;
+        } 
+    }
     #endregion
 
     #region Faction & Alliance
     [Header("Faction Settings")]
-    [SerializeField] private FactionType faction;
-    [SerializeField] private List<FactionType> allyFactions = new List<FactionType>();
+    [SerializeField] private EntityGroup entityGroup;
+    [SerializeField] private List<EntityGroup> alliedEntityGroups = new List<EntityGroup>();
     #endregion
 
     #region Agent Properties
-    [Header("Agent Type")]
-    [SerializeField] private AgentType agentType;
+    [Header("Entity Settings")]
+    [SerializeField] private EntityType entityType;
     [SerializeField] private bool isInvisible = false;
     #endregion
 
@@ -49,17 +55,41 @@ public class HealthManager : MonoBehaviour
 
     #region UI Components
     [Header("UI Elements")]
-    [SerializeField] private Image healthBarImage;
+    [SerializeField] private Image healthBar;
     [SerializeField] private Transform aimOffset;
-
-
     #endregion
 
     #region Exposed Properties
-    public FactionType Faction => faction;
-    public AgentType AgentType => agentType;
-    public List<FactionType> AlliedFactions => allyFactions;
-    public bool IsVisible => !isInvisible;
+    public EntityGroup EntityGroup
+    {
+        get
+        {
+            return entityGroup;
+        }
+    }
+    public EntityType EntityType
+    {
+        get
+        {
+            return entityType;
+        }
+    }
+    public List<EntityGroup> AlliedEntityGroups
+    {
+        get
+        {
+            return alliedEntityGroups;
+        }
+    }
+
+    public bool IsVisible
+    {
+        get
+        {
+            return !isInvisible;
+        }
+    }
+
     public Transform AimOffset
     {
         get
@@ -67,32 +97,62 @@ public class HealthManager : MonoBehaviour
             return aimOffset;
         }
     }
-    #endregion
 
-    #region Combat Tracking
-    public HealthManager CurrentAttacker => currentAttacker;
-    #endregion
+    public HealthManager CurrentAttacker
+    {
+        get
+        {
+            return currentAttacker;
+        }
+    }
 
-    #region UI Components
-    public Image HealthBarImage => healthBarImage;
+    public Image HealthBar
+    {
+        get
+        {
+            return healthBar;
+        }
+    }
     #endregion
 
     #region Core Functionality
     protected virtual void Awake()
     {
-        InitializeHealth();
         LoadComponents();
+        InitializeHealth();
+    }
+
+    protected virtual void LoadComponents()
+    {
+
+    }
+
+    public void InitializeHealth()
+    {
+        if (currentHealth <= 0 && maxHealth > 0)
+        {
+            currentHealth = maxHealth;
+        }
+        else
+        {
+            currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+        }
+
+        UpdateHealthDisplay();
     }
 
     public virtual void TakeDamage(int damage, HealthManager attacker)
     {
         if (ShouldIgnoreDamage(attacker)) return;
 
+        if (IsDead)
+        {
+            HandleDeath();
+        }
+
         ApplyDamage(damage);
         UpdateHealthDisplay();
         TrackAttacker(attacker);
-
-        if (IsDead) HandleDeath();
     }
 
     private bool ShouldIgnoreDamage(HealthManager attacker)
@@ -102,12 +162,12 @@ public class HealthManager : MonoBehaviour
 
     private bool IsAlly(HealthManager other)
     {
-        return other != null && allyFactions.Contains(other.faction);
+        return other != null && alliedEntityGroups.Contains(other.entityGroup);
     }
 
     private void ApplyDamage(int damage)
     {
-        currentHealth = Mathf.Max(currentHealth - damage, 0);
+        currentHealth = Mathf.Clamp(currentHealth - damage, 0, maxHealth);
     }
 
     private void TrackAttacker(HealthManager attacker)
@@ -115,7 +175,9 @@ public class HealthManager : MonoBehaviour
         if (attacker == null) return;
 
         if (attackerTrackingRoutine != null)
+        {
             StopCoroutine(attackerTrackingRoutine);
+        }
 
         attackerTrackingRoutine = StartCoroutine(TrackAttackerCoroutine(attacker));
     }
@@ -129,9 +191,9 @@ public class HealthManager : MonoBehaviour
 
     private void UpdateHealthDisplay()
     {
-        if (healthBarImage != null)
+        if (healthBar != null)
         {
-            healthBarImage.fillAmount = (float)currentHealth / maxHealth;
+            healthBar.fillAmount = currentHealth / maxHealth;
         }
     }
 
@@ -139,23 +201,12 @@ public class HealthManager : MonoBehaviour
     {
         Destroy(gameObject);
     }
-
-    public void InitializeHealth()
-    {
-        currentHealth = maxHealth;
-        UpdateHealthDisplay();
-    }
-
-    protected virtual void LoadComponents()
-    {
-
-    }
     #endregion
 
     #region Utility Methods
     public void Heal(int amount)
     {
-        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
         UpdateHealthDisplay();
     }
 

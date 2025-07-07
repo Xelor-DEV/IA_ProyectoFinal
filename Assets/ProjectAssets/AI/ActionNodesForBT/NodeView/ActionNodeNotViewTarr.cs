@@ -12,12 +12,14 @@ public class ActionNodeNotViewTarr : ActionNodeView
 
     public override TaskStatus OnUpdate()
     {
+        /*
         // Devuelve Success cuando NO es un Tarr pero hay un enemigo detectado
         if (aiEye.DetectedEnemy != null &&
            aiEye.DetectedEnemy.AgentType != AgentType.Tarr)
         {
             return TaskStatus.Success;
         }
+        */
         return TaskStatus.Failure;
     }
 }

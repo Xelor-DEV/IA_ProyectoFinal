@@ -1,7 +1,7 @@
 using BehaviorDesigner.Runtime.Tasks;
 
 [TaskCategory("MyAI/Move")]
-public class ActionNodeWander : ActionNodeVehicle
+public class ActionNodeVehicleWander : ActionNodeVehicle
 {
     public override void OnStart()
     {
@@ -20,20 +20,19 @@ public class ActionNodeWander : ActionNodeVehicle
 
     void SwitchAgentType()
     {
-        switch (healthManager.AgentType)
+        switch (healthManager.EntityType)
         {
-            case AgentType.Slime:
+            case EntityType.PinkSlime:
                 (aiCharacterVehicle as AICharacterVehiclesSlime)?.MoveToWander();
                 break;
 
-            case AgentType.Tarr:
+            case EntityType.Tarr:
                 (aiCharacterVehicle as AICharacterVehiclesTarr)?.MoveToWander();
                 break;
 
-            case AgentType.None:
+            case EntityType.None:
             default:
                 break;
         }
-  
     }
 }
