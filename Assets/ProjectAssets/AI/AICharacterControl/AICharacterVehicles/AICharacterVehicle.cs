@@ -3,66 +3,63 @@ using UnityEngine.AI;
 
 public class AICharacterVehicle : AICharacterControl
 {
-    [Header("Wander Settings")]
-    [SerializeField] private float wanderRadius = 10f;
-    [SerializeField] private float wanderJitter = 1f;
-    [SerializeField] private float sampleRange = 1f;
+    protected float speedRotation = 0;
 
-    [Header("Evade/Pursuit Settings")]
-    [SerializeField] private float evadeDistance = 10f;
-    [SerializeField] private float predictionTime = 2f;
+    public float RangeWander;
+    Vector3 positionWander;
+    float FrameRate = 0;
+    float Rate = 4;
 
-    private Vector3 wanderTarget;
-
-    public void MoveToWander()
+    public virtual void LookEnemy()
     {
-        if (AIEye.DetectedEnemy != null) return;
-
-        // Generar punto aleatorio en el NavMesh
-        Vector3 randomPoint = transform.position + Random.insideUnitSphere * wanderRadius;
-        NavMeshHit hit;
-
-        if (NavMesh.SamplePosition(randomPoint, out hit, sampleRange, NavMesh.AllAreas))
-        {
-            Agent.SetDestination(hit.position);
-        }
+        if (AIEye.ViewEnemy == null) return;
+        Vector3 dir = (AIEye.ViewEnemy.transform.position - transform.position).normalized;
+        Quaternion rot = Quaternion.LookRotation(dir);
+        rot.x = 0;
+        rot.z = 0;
+        transform.rotation = Quaternion.Lerp(transform.rotation, rot, Time.deltaTime * 50);
     }
 
-    public void Evade(HealthManager target)
+    public virtual void LookPosition(Vector3 position)
     {
-        if (target == null) return;
 
-        Vector3 futurePosition = CalculateFuturePosition(target);
-        Vector3 fleeDirection = (transform.position - futurePosition).normalized;
-        Vector3 fleeTarget = transform.position + fleeDirection * evadeDistance;
-
-        NavMeshHit hit;
-        if (NavMesh.SamplePosition(fleeTarget, out hit, sampleRange, NavMesh.AllAreas))
-        {
-            Agent.SetDestination(hit.position);
-        }
+        Vector3 dir = (position - transform.position).normalized;
+        Quaternion rot = Quaternion.LookRotation(dir);
+        rot.x = 0;
+        rot.z = 0;
+        transform.rotation = Quaternion.Lerp(transform.rotation, rot, Time.deltaTime * speedRotation);
     }
 
-    public void Pursue(HealthManager target)
+    public virtual void MoveToPosition(Vector3 pos)
     {
-        if (target == null) return;
-
-        Vector3 futurePosition = CalculateFuturePosition(target);
-
-        NavMeshHit hit;
-        if (NavMesh.SamplePosition(futurePosition, out hit, sampleRange, NavMesh.AllAreas))
-        {
-            Agent.SetDestination(hit.position);
-        }
+        agent.SetDestination(pos);
     }
 
-    private Vector3 CalculateFuturePosition(HealthManager target)
+    Vector3 RandoWander(Vector3 position, float range)
     {
-        NavMeshAgent targetAgent = target.GetComponent<NavMeshAgent>();
-        if (targetAgent != null)
+        Vector3 randP = Random.insideUnitSphere * range;
+        randP.y = transform.position.y;
+        return position + randP;
+    }
+    public virtual void MoveToWander()
+    {
+        if (AIEye.ViewEnemy != null) return;
+
+        float distance = (transform.position - positionWander).magnitude;
+
+        if (distance < 2)
         {
-            return target.transform.position + targetAgent.velocity * predictionTime;
+            positionWander = RandoWander(transform.position, RangeWander);
         }
-        return target.transform.position;
+
+        if (FrameRate > Rate)
+        {
+            FrameRate = 0;
+            positionWander = RandoWander(transform.position, RangeWander);
+        }
+        FrameRate += Time.deltaTime;
+
+
+        MoveToPosition(positionWander);
     }
 }

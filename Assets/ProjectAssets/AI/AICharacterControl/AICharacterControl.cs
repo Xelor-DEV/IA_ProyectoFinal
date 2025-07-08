@@ -3,9 +3,46 @@ using UnityEngine.AI;
 
 public class AICharacterControl : MonoBehaviour
 {
-    public NavMeshAgent Agent { get; protected set; }
-    public HealthManager Health { get; protected set; }
-    public AIEye AIEye { get; protected set; }
+    [Header("Debug Show Components")]
+    [SerializeField] protected NavMeshAgent agent;
+    [SerializeField] protected HealthManager health;
+    [SerializeField] protected AIEye aiEye;
+
+    public NavMeshAgent Agent
+    {
+        get
+        {
+            return agent;
+        }
+        protected set
+        {
+            agent = value;
+        }
+    }
+
+    public HealthManager Health 
+    {
+        get
+        {
+            return health;
+        }
+        protected set
+        {
+            health = value;
+        }
+    }
+
+    public AIEye AIEye 
+    {
+        get
+        {
+            return aiEye;
+        }
+        protected set
+        {
+            aiEye = value;
+        }
+    }
 
     protected virtual void Awake()
     {
@@ -22,10 +59,10 @@ public class AICharacterControl : MonoBehaviour
 
     }
 
-    public virtual void LoadComponent()
+    protected virtual void LoadComponent()
     {
-        Agent = GetComponent<NavMeshAgent>();
-        Health = GetComponent<HealthManager>();
-        AIEye = GetComponent<AIEye>();
+        agent = GetComponent<NavMeshAgent>();
+        health = GetComponent<HealthManager>();
+        aiEye = GetComponent<AIEye>();
     }
 }
