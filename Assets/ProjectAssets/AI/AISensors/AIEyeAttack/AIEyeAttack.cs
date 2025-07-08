@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class AIEyeAttack : AIEye
+public class AIEyeAttack : AIEyeBase
 {
 
 }

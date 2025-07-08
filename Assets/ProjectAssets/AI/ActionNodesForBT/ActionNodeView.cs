@@ -3,10 +3,10 @@ using BehaviorDesigner.Runtime.Tasks;
 [TaskCategory("MyAI/View")]
 public class ActionNodeView : ActionNode
 {
-    protected AIEye aiEye;
+    protected AIEyeBase aiEye;
     public override void OnStart()
     {
         base.OnStart();
-        aiEye = gameObject.GetComponent<AIEye>();
+        aiEye = gameObject.GetComponent<AIEyeBase>();
     }
 }

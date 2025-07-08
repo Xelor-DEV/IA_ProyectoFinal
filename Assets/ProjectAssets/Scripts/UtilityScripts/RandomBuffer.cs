@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public enum BufferType 
@@ -6,7 +7,8 @@ public enum BufferType
     Float 
 }
 
-public class RandomBuffer : MonoBehaviour
+[Serializable]
+public class RandomBuffer
 {
     [Header("Buffer Configuration")]
     [Tooltip("Tamaño del buffer (cantidad de valores aleatorios)")]
@@ -33,12 +35,31 @@ public class RandomBuffer : MonoBehaviour
 
     private int currentIndex = 0;
 
-    void Start()
+    public int CurrentIndex
     {
-        InitializeBuffer();
+        get
+        {
+            return currentIndex;
+        }
     }
 
-    void InitializeBuffer()
+    public int[] IntBuffer
+    {
+        get
+        {
+            return intBuffer;
+        }
+    }
+
+    public float[] FloatBuffer
+    {
+        get
+        {
+            return floatBuffer;
+        }
+    }
+
+    public void InitializeBuffer()
     {
         currentIndex = 0;
 
@@ -65,7 +86,7 @@ public class RandomBuffer : MonoBehaviour
 
         for (int i = 0; i < bufferSize; ++i)
         {
-            intBuffer[i] = Random.Range(minInt, maxInt + 1);
+            intBuffer[i] = UnityEngine.Random.Range(minInt, maxInt + 1);
         }
     }
 
@@ -76,7 +97,7 @@ public class RandomBuffer : MonoBehaviour
 
         for (int i = 0; i < bufferSize; ++i)
         {
-            floatBuffer[i] = Random.Range(minValue, maxValue);
+            floatBuffer[i] = UnityEngine.Random.Range(minValue, maxValue);
         }
     }
 
@@ -108,6 +129,36 @@ public class RandomBuffer : MonoBehaviour
             UpdateCurrentValueDisplay(value);
             currentIndex = (currentIndex + 1) % bufferSize;
             return value;
+        }
+    }
+
+    public void MoveNext()
+    {
+        switch (bufferType)
+        {
+            case BufferType.Int:
+                if (intBuffer == null || intBuffer.Length == 0)
+                {
+                    Debug.LogError("Buffer de enteros no inicializado!");
+                    return;
+                }
+
+                UpdateCurrentValueDisplay(intBuffer[currentIndex]);
+                currentIndex = (currentIndex + 1) % bufferSize;
+                break;
+            case BufferType.Float:
+                if (floatBuffer == null || floatBuffer.Length == 0)
+                {
+                    Debug.LogError("Buffer de floats no inicializado!");
+                    return;
+                }
+
+                UpdateCurrentValueDisplay(floatBuffer[currentIndex]);
+                currentIndex = (currentIndex + 1) % bufferSize;
+                break;
+            default:
+                InitializeFloatBuffer();
+                break;
         }
     }
 

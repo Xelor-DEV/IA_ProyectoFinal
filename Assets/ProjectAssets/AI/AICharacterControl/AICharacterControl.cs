@@ -6,7 +6,7 @@ public class AICharacterControl : MonoBehaviour
     [Header("Debug Show Components")]
     [SerializeField] protected NavMeshAgent agent;
     [SerializeField] protected HealthManager health;
-    [SerializeField] protected AIEye aiEye;
+    [SerializeField] protected AIEyeBase aiEye;
 
     public NavMeshAgent Agent
     {
@@ -32,7 +32,7 @@ public class AICharacterControl : MonoBehaviour
         }
     }
 
-    public AIEye AIEye 
+    public AIEyeBase AIEye 
     {
         get
         {
@@ -63,6 +63,6 @@ public class AICharacterControl : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         health = GetComponent<HealthManager>();
-        aiEye = GetComponent<AIEye>();
+        aiEye = GetComponent<AIEyeBase>();
     }
 }

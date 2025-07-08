@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class AIEyeRecolect : AIEye
+public class AIEyeRecolect : AIEyeBase
 {
 
 }

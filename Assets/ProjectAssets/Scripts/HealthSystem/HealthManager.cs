@@ -141,7 +141,7 @@ public class HealthManager : MonoBehaviour
         UpdateHealthDisplay();
     }
 
-    public virtual void TakeDamage(int damage, HealthManager attacker)
+    public virtual void TakeDamage(float damage, HealthManager attacker)
     {
         if (ShouldIgnoreDamage(attacker)) return;
 
@@ -165,7 +165,7 @@ public class HealthManager : MonoBehaviour
         return other != null && alliedEntityGroups.Contains(other.entityGroup);
     }
 
-    private void ApplyDamage(int damage)
+    private void ApplyDamage(float damage)
     {
         currentHealth = Mathf.Clamp(currentHealth - damage, 0, maxHealth);
     }

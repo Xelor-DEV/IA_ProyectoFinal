@@ -1,7 +1,9 @@
 using UnityEngine;
+using System;
 using System.Collections;
+using UnityEditor;
+using UnityEngine.Playables;
 
-[System.Serializable]
 public class DataViewBase
 {
     #region Vision Configuration
@@ -24,8 +26,23 @@ public class DataViewBase
     public float VisionHeight => visionHeight;
     public float MaxDistance => maxDetectionDistance;
     public LayerMask ScanLayers => scanLayers;
-    public HealthManager Owner => owner;
+    public HealthManager Owner
+    {
+        get
+        {
+            return owner;
+        }
+        set
+        {
+            owner = value;
+        }
+    }
     public Mesh VisionMesh { get; protected set; }
+
+    public DataViewBase()
+    {
+
+    }
     #endregion
 
     #region Core Functionality
@@ -123,28 +140,31 @@ public class DataViewBase
     #endregion
 
     #region Gizmos
-    public virtual void DrawVisionGizmos()
+    public virtual void OnDrawGizmos()
     {
-        if (!drawGizmos || VisionMesh == null || Owner == null) return;
+        if (!drawGizmos) return;
 
-        Gizmos.color = outOfSightColor;
-        Gizmos.DrawMesh(VisionMesh, Owner.transform.position, Owner.transform.rotation);
+        if (VisionMesh != null && Owner != null)
+        {
+            Gizmos.color = outOfSightColor;
+            Gizmos.DrawMesh(VisionMesh, Owner.transform.position, Owner.transform.rotation);
+        }
     }
     #endregion
 }
 
-[System.Serializable]
+[Serializable]
 public class DataView : DataViewBase
 {
     #region Occlusion Settings
     [Header("Occlusion Settings")]
-    [SerializeField] private LayerMask _occlusionLayers;
-    [SerializeField] private bool _checkInsideObjects = true;
-    [SerializeField] private Color _inSightColor = Color.green;
+    [SerializeField] private LayerMask occlusionLayers;
+    [SerializeField] private bool checkInsideObjects = true;
+    [SerializeField] private Color inSightColor = Color.green;
     #endregion
 
     #region Vision State
-    public bool TargetInSight { get; private set; }
+    public bool TargetInSight { get; set; }
     #endregion
 
     #region Detection Logic
@@ -166,10 +186,16 @@ public class DataView : DataViewBase
         return TargetInSight;
     }
 
-    private bool ValidateDistance(Vector3 direction) => direction.magnitude <= MaxDistance;
-    private bool ValidateHeight(Vector3 targetPos) =>
-        Mathf.Abs(targetPos.y - Owner.transform.position.y) <= VisionHeight;
+    private bool ValidateDistance(Vector3 direction)
+    {
+        return direction.magnitude <= MaxDistance;
+    }
 
+    private bool ValidateHeight(Vector3 targetPos)
+    {
+        return Mathf.Abs(targetPos.y - Owner.transform.position.y) <= VisionHeight;
+    }
+        
     private bool ValidateAngle(Vector3 direction)
     {
         float horizontalAngle = Vector3.Angle(direction.normalized, Owner.transform.forward);
@@ -178,149 +204,188 @@ public class DataView : DataViewBase
 
     private bool CheckOcclusion(Vector3 origin, Vector3 target)
     {
-        return Physics.Linecast(origin, target, _occlusionLayers) && _checkInsideObjects;
+        return Physics.Linecast(origin, target, occlusionLayers) && checkInsideObjects;
     }
     #endregion
 
     #region Gizmos
-    public override void DrawVisionGizmos()
+    public override void OnDrawGizmos()
     {
-        if (!drawGizmos || VisionMesh == null || Owner == null) return;
+        if (!drawGizmos) return;
 
-        Gizmos.color = TargetInSight ? _inSightColor : outOfSightColor;
-        Gizmos.DrawMesh(VisionMesh, Owner.transform.position, Owner.transform.rotation);
+
+        if (VisionMesh != null && Owner != null)
+        {
+            if (TargetInSight)
+            {
+                Gizmos.color = inSightColor;
+            }
+            else
+                Gizmos.color = inSightColor;
+
+            Gizmos.DrawMesh(VisionMesh, Owner.transform.position, Owner.transform.rotation);
+        }
     }
     #endregion
 }
 
-public class AIEye : MonoBehaviour
+public class AIEyeBase : MonoBehaviour
 {
     #region Scan Settings
     [Header("Scan Configuration")]
-    [SerializeField] private DataView _mainVision = new DataView();
-    [SerializeField, Min(0.1f)] private float _minScanInterval = 1f;
-    [SerializeField, Min(0.1f)] private float _maxScanInterval = 1f;
+    [SerializeField] protected DataView mainVision = new DataView();
+    [SerializeField] protected RandomBuffer scanIntervals;
     #endregion
 
     #region Scan State
     [Header("Scan Results")]
-    [SerializeField] private HealthManager _detectedEnemy;
-    [SerializeField] private HealthManager _detectedAlly;
-    [SerializeField] private Vector3 _currentTarget;
-    [SerializeField] private int _enemiesInView;
+    [SerializeField] protected HealthManager detectedEnemy;
+    [SerializeField] protected HealthManager detectedAlly;
+    [SerializeField] protected Vector3 currentTarget;
+    [SerializeField] protected int enemiesInView;
     #endregion
 
     #region Dependencies
     [Header("Component References")]
-    [SerializeField] private HealthManager linkedHealth;
-    [SerializeField] private Transform _aimOffset;
+    [SerializeField] protected HealthManager linkedHealth;
+    [SerializeField] protected Transform aimOffset;
     #endregion
 
     #region Runtime Variables
-    private float[] _scanIntervals;
-    private int _currentIntervalIndex;
-    private float _scanTimer;
+    protected float _scanTimer;
     #endregion
 
     #region Properties
-    public HealthManager DetectedEnemy => _detectedEnemy;
-    public HealthManager DetectedAlly => _detectedAlly;
-    public Vector3 CurrentTarget => _currentTarget;
+    public HealthManager DetectedEnemy => detectedEnemy;
+    public HealthManager DetectedAlly => detectedAlly;
+    public Vector3 CurrentTarget => currentTarget;
+    #endregion
 
-    public float EnemyDistance =>
-        _detectedEnemy ? Vector3.Distance(transform.position, _detectedEnemy.transform.position) : -1f;
+    #region Direction and Distance
+    public float DistanceEnemy
+    {
+        get
+        {
+            return (this.detectedEnemy != null) ? (transform.position - this.detectedEnemy.transform.position).magnitude : -1;
+        }
+    }
+    public Vector3 DirectionEnemy
+    {
+        get
+        {
+            if (this.detectedEnemy != null)
+            {
+                return (this.detectedEnemy.transform.position - transform.position).normalized;
+            }
+            return Vector3.zero;
+        }
+    }
+    public float DistanceAllied
+    {
+        get
+        {
+            return (this.detectedAlly != null) ? (transform.position - this.detectedAlly.transform.position).magnitude : -1;
+        }
+    }
+    public Vector3 DirectionAllied
+    {
+        get
+        {
+            if (this.detectedAlly != null)
+            {
+                return (this.detectedAlly.transform.position - transform.position).normalized;
+            }
+            return Vector3.zero;
+        }
+    }
 
-    public Vector3 EnemyDirection =>
-        _detectedEnemy ? (_detectedEnemy.transform.position - transform.position).normalized : Vector3.zero;
+    public float DistanceTarget
+    {
+        get
+        {
+            return (transform.position - this.currentTarget).magnitude;
+        }
+    }
+    public Vector3 DirectionTarget
+    {
+        get
+        {
+            return (currentTarget - transform.position).normalized;
+        }
+    }
     #endregion
 
     #region Initialization
     protected virtual void Awake()
     {
-        InitializeVision();
-        SetupScanIntervals();
+        LoadComponents();
     }
 
-    private void OnValidate()
+    protected virtual void LoadComponents()
     {
-        if (_mainVision != null)
+        if (linkedHealth == null)
         {
-            _mainVision.Initialize();
+            linkedHealth = GetComponent<HealthManager>();
         }
-    }
 
-    private void InitializeVision()
-    {
-        _mainVision.Initialize();
-    }
-
-    private void SetupScanIntervals()
-    {
-        _scanIntervals = new float[10];
-        for (int i = 0; i < _scanIntervals.Length; i++)
-        {
-            _scanIntervals[i] = Random.Range(_minScanInterval, _maxScanInterval);
-        }
+        mainVision.Owner = linkedHealth;
+        _scanTimer = 0;
+        scanIntervals.InitializeBuffer();
     }
     #endregion
 
     #region Scan Logic
-    protected virtual void Update()
+    public virtual void UpdateScan()
     {
-        if (linkedHealth == null) return;
-        UpdateScanTimer();
-        HandleEnemyState();
-    }
 
-    private void UpdateScanTimer()
-    {
-        _scanTimer += Time.deltaTime;
-        if (_scanTimer >= _scanIntervals[_currentIntervalIndex])
+        if (_scanTimer > scanIntervals.FloatBuffer[scanIntervals.CurrentIndex])
         {
-            PerformScan();
-            AdvanceScanInterval();
-            ResetTimer();
+            scanIntervals.MoveNext();
+            Scan();
+            _scanTimer = 0;
+        }
+
+        _scanTimer += Time.deltaTime;
+
+        if (detectedEnemy != null && ((detectedEnemy.IsDead) || (detectedEnemy.IsVisible)))
+        {
+            detectedEnemy = null;
         }
     }
 
-    private void AdvanceScanInterval()
+    public virtual void Scan()
     {
-        _currentIntervalIndex = (_currentIntervalIndex + 1) % _scanIntervals.Length;
-    }
+        if (linkedHealth.CurrentAttacker != null && linkedHealth.IsDead) return;
+        detectedAlly = null;
+        detectedEnemy = null;
+        Collider[] colliders = Physics.OverlapSphere(transform.position, mainVision.MaxDistance, mainVision.ScanLayers);
+        enemiesInView = 0;
 
-    private void ResetTimer() => _scanTimer = 0f;
 
-    protected virtual void PerformScan()
-    {
-        if (linkedHealth.IsDead) return;
+        float min_dist = 10000000000f;
 
-        Collider[] hitColliders = Physics.OverlapSphere(
-            transform.position,
-            _mainVision.MaxDistance,
-            _mainVision.ScanLayers
-        );
-
-        ProcessDetectedObjects(hitColliders);
-    }
-
-    private void ProcessDetectedObjects(Collider[] colliders)
-    {
-        _enemiesInView = 0;
-        float closestDistance = Mathf.Infinity;
-
-        foreach (Collider col in colliders)
+        for (int i = 0; i < colliders.Length; ++i)
         {
-            if (IsSelf(col.gameObject)) continue;
 
-            HealthManager targetHealth = col.GetComponent<HealthManager>();
-            if (IsValidTarget(targetHealth))
+            GameObject obj = colliders[i].gameObject;
+
+            if (this.IsNotIsThis(this.gameObject, obj))
             {
-                EvaluateTarget(targetHealth, ref closestDistance);
+                HealthManager targetHealth = obj.GetComponent<HealthManager>();
+                if (IsValidTarget(targetHealth))
+                {
+                    EvaluateTarget(targetHealth, ref min_dist);
+                }
+
             }
         }
     }
 
-    private bool IsSelf(GameObject obj) => obj.GetInstanceID() == gameObject.GetInstanceID();
+    public virtual bool IsNotIsThis(GameObject obj1, GameObject obj2)
+    {
+
+        return (obj1.GetInstanceID() != obj2.GetInstanceID());
+    }
 
     private bool IsValidTarget(HealthManager targetHealth)
     {
@@ -328,44 +393,30 @@ public class AIEye : MonoBehaviour
                targetHealth.gameObject.activeSelf &&
                !targetHealth.IsDead &&
                targetHealth.IsVisible &&
-               _mainVision.IsInSight(targetHealth.AimOffset);
+               mainVision.IsInSight(targetHealth.AimOffset);
     }
 
     private void EvaluateTarget(HealthManager target, ref float closestDistance)
     {
         if (IsAlly(target))
         {
-            _detectedAlly = target;
+            detectedAlly = target;
             return;
         }
 
-        _enemiesInView++;
-        float currentDistance = Vector3.Distance(transform.position, target.transform.position);
-        if (currentDistance < closestDistance)
+        float dist = (transform.position - target.transform.position).magnitude;
+        if (closestDistance > dist)
         {
-            closestDistance = currentDistance;
-            _detectedEnemy = target;
+            detectedEnemy = target;
+            closestDistance = dist;
+
         }
+        enemiesInView++;
     }
 
     protected virtual bool IsAlly(HealthManager target)
     {
         return linkedHealth.AlliedEntityGroups.Contains(target.EntityGroup);
-    }
-
-    private void HandleEnemyState()
-    {
-        if (_detectedEnemy && (_detectedEnemy.IsDead || !_detectedEnemy.IsVisible))
-        {
-            _detectedEnemy = null;
-        }
-    }
-    #endregion
-
-    #region Gizmos
-    private void OnDrawGizmos()
-    {
-        _mainVision.DrawVisionGizmos();
     }
     #endregion
 }

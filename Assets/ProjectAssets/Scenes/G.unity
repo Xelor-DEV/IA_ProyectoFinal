@@ -1226,6 +1226,7 @@ GameObject:
   - component: {fileID: 459892155}
   - component: {fileID: 459892154}
   - component: {fileID: 459892156}
+  - component: {fileID: 459892158}
   m_Layer: 0
   m_Name: PinkSlime
   m_TagString: Untagged
@@ -1357,8 +1358,24 @@ MonoBehaviour:
         byteData: 
         byteDataArray: 
       Version: 
-  gizmoViewMode: 0
-  showBehaviorDesignerGizmo: 0
+  gizmoViewMode: 2
+  showBehaviorDesignerGizmo: 1
+--- !u!114 &459892158
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 459892150}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86aa183949841804396cf72ed5d54e55, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  agent: {fileID: 0}
+  health: {fileID: 0}
+  aiEye: {fileID: 0}
+  belly: 0
 --- !u!1001 &477996746
 PrefabInstance:
   m_ObjectHideFlags: 0
