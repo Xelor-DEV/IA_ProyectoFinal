@@ -11,23 +11,25 @@ public class ActionNodeVehicleWander : ActionNodeVehicle
     public override TaskStatus OnUpdate()
     {
         if (healthManager.IsDead)
+        {
             return TaskStatus.Failure;
+        }
 
         SwitchAgentType();
 
         return TaskStatus.Success;
     }
 
-    void SwitchAgentType()
+    private void SwitchAgentType()
     {
         switch (healthManager.EntityType)
         {
             case EntityType.PinkSlime:
-                (aiCharacterVehicle as AICharacterVehiclesSlime)?.MoveToWander();
+                (aiCharacterVehicle as AICharacterVehiclesSlime)?.Wander();
                 break;
 
             case EntityType.Tarr:
-                (aiCharacterVehicle as AICharacterVehiclesTarr)?.MoveToWander();
+                (aiCharacterVehicle as AICharacterVehiclesTarr)?.Wander();
                 break;
 
             case EntityType.None:

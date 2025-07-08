@@ -3,63 +3,111 @@ using UnityEngine.AI;
 
 public class AICharacterVehicle : AICharacterControl
 {
-    protected float speedRotation = 0;
+    [Header("Movement Settings")]
+    [SerializeField] protected float rotationSpeed = 50f; // Speed of rotation towards target position
+    [SerializeField] protected float positionSampleRadius = 1f; // Radius to check for valid NavMesh positions
 
-    public float RangeWander;
-    Vector3 positionWander;
-    float FrameRate = 0;
-    float Rate = 4;
+    [Header("Wander Settings")]
+    [SerializeField] protected float wanderRange = 10f; // Maximum distance for wander points
+    [SerializeField] protected float wanderInterval = 4f; // Time between new wander point selections
 
-    public virtual void LookEnemy()
+    [Header("Gizmos Settings")]
+    [SerializeField] protected bool showGizmos = true;
+    [SerializeField] protected Color wanderRangeColor = Color.cyan;
+    [SerializeField] protected Color wanderTargetColor = Color.yellow;
+    [SerializeField] protected Color validPositionColor = Color.green;
+    [SerializeField] protected Color invalidPositionColor = Color.red;
+
+    protected Vector3 currentWanderTarget; // Current wander destination
+    protected float wanderTimer; // Timer for wander point updates
+    protected bool lastPositionValid; // Track if last sampled position was valid
+
+    protected override void Awake()
     {
-        if (AIEye.ViewEnemy == null) return;
-        Vector3 dir = (AIEye.ViewEnemy.transform.position - transform.position).normalized;
-        Quaternion rot = Quaternion.LookRotation(dir);
-        rot.x = 0;
-        rot.z = 0;
-        transform.rotation = Quaternion.Lerp(transform.rotation, rot, Time.deltaTime * 50);
+        base.Awake();
+        currentWanderTarget = GetRandomWanderPosition(transform.position, wanderRange);
     }
 
-    public virtual void LookPosition(Vector3 position)
+    protected virtual void LookTowards(Vector3 targetPosition)
     {
-
-        Vector3 dir = (position - transform.position).normalized;
-        Quaternion rot = Quaternion.LookRotation(dir);
-        rot.x = 0;
-        rot.z = 0;
-        transform.rotation = Quaternion.Lerp(transform.rotation, rot, Time.deltaTime * speedRotation);
+        Vector3 direction = (targetPosition - transform.position).normalized;
+        Quaternion targetRotation = Quaternion.LookRotation(direction);
+        targetRotation.x = 0;
+        targetRotation.z = 0;
+        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
     }
 
-    public virtual void MoveToPosition(Vector3 pos)
+    protected virtual void MoveToPosition(Vector3 targetPosition)
     {
-        agent.SetDestination(pos);
-    }
-
-    Vector3 RandoWander(Vector3 position, float range)
-    {
-        Vector3 randP = Random.insideUnitSphere * range;
-        randP.y = transform.position.y;
-        return position + randP;
-    }
-    public virtual void MoveToWander()
-    {
-        if (AIEye.ViewEnemy != null) return;
-
-        float distance = (transform.position - positionWander).magnitude;
-
-        if (distance < 2)
+        // Sample position on NavMesh to ensure accessibility
+        if (SampleValidPosition(targetPosition, positionSampleRadius, out Vector3 validPosition))
         {
-            positionWander = RandoWander(transform.position, RangeWander);
+            agent.SetDestination(validPosition);
+            lastPositionValid = true;
+        }
+        else
+        {
+            // Handle inaccessible position (optional: search for nearest valid point)
+            lastPositionValid = false;
+            Debug.LogWarning("Target position not accessible on NavMesh: " + targetPosition);
+        }
+    }
+
+    protected bool SampleValidPosition(Vector3 targetPosition, float sampleRadius, out Vector3 result)
+    {
+        if (NavMesh.SamplePosition(targetPosition, out NavMeshHit hit, sampleRadius, NavMesh.AllAreas))
+        {
+            result = hit.position;
+            return true;
         }
 
-        if (FrameRate > Rate)
+        result = targetPosition;
+        return false;
+    }
+
+    protected Vector3 GetRandomWanderPosition(Vector3 origin, float range)
+    {
+        Vector3 randomPosition = origin + Random.insideUnitSphere * range;
+        randomPosition.y = origin.y; // Maintain same height
+
+        // Ensure position is valid on NavMesh
+        if (SampleValidPosition(randomPosition, positionSampleRadius, out Vector3 validPosition))
         {
-            FrameRate = 0;
-            positionWander = RandoWander(transform.position, RangeWander);
+            return validPosition;
         }
-        FrameRate += Time.deltaTime;
+        return origin; // Fallback to origin if no valid position found
+    }
 
+    public virtual void Wander()
+    {
+        float distanceToTarget = Vector3.Distance(transform.position, currentWanderTarget);
 
-        MoveToPosition(positionWander);
+        // Get new wander position if close to target or interval passed
+        if (distanceToTarget < 2f || wanderTimer > wanderInterval)
+        {
+            currentWanderTarget = GetRandomWanderPosition(transform.position, wanderRange);
+            wanderTimer = 0f;
+        }
+
+        wanderTimer += Time.deltaTime;
+        MoveToPosition(currentWanderTarget);
+    }
+
+    protected virtual void OnDrawGizmos()
+    {
+        if (!showGizmos) return;
+
+        // Draw wander range
+        Gizmos.color = wanderRangeColor;
+        Gizmos.DrawWireSphere(transform.position, wanderRange);
+
+        // Draw position sample radius
+        Gizmos.color = lastPositionValid ? validPositionColor : invalidPositionColor;
+        Gizmos.DrawWireSphere(currentWanderTarget, positionSampleRadius);
+
+        // Draw current wander target
+        Gizmos.color = wanderTargetColor;
+        Gizmos.DrawSphere(currentWanderTarget, 0.3f);
+        Gizmos.DrawLine(transform.position, currentWanderTarget);
     }
 }
