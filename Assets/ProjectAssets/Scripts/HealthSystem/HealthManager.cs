@@ -7,7 +7,7 @@ public enum EntityGroup
 {
     Friendly_Slime,
     Hostile_Slime, 
-    Human
+    Rancher
 }
 
 public enum EntityType 

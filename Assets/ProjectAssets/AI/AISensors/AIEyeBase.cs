@@ -321,6 +321,30 @@ public class AIEyeBase : MonoBehaviour
         LoadComponents();
     }
 
+    protected virtual void Start()
+    {
+
+    }
+
+    protected virtual void OnValidate()
+    {
+
+    }
+
+    protected virtual void OnDrawGizmos()
+    {
+
+    }
+
+    protected virtual void FixedUpdate()
+    {
+    }
+
+    protected virtual void Update()
+    {
+
+    }
+
     protected virtual void LoadComponents()
     {
         if (linkedHealth == null)
