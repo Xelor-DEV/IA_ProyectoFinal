@@ -6,10 +6,21 @@ public class AICharacterVehicle : AICharacterControl
     [Header("Movement Settings")]
     [SerializeField] protected float rotationSpeed = 50f; // Speed of rotation towards target position
     [SerializeField] protected float positionSampleRadius = 1f; // Radius to check for valid NavMesh positions
+    [SerializeField] protected float defaultSpeed = 3.5f;
+    [SerializeField] protected float maxSpeed = 5f;
 
     [Header("Wander Settings")]
     [SerializeField] protected float wanderRange = 10f; // Maximum distance for wander points
     [SerializeField] protected float wanderInterval = 4f; // Time between new wander point selections
+
+    [Header("Move To Enemy")]
+    [SerializeField] protected float thresholdDistance = 0.3f;
+
+    [Header("Evade Settings")]
+    [SerializeField] protected float evadeDistance = 10f;
+    [SerializeField] protected float evadeSpeedMultiplier = 1.5f;
+    [SerializeField] protected float evadeCooldown = 5f;
+    protected float _lastEvadeTime = -10f;
 
     [Header("Gizmos Settings")]
     [SerializeField] protected bool showGizmos = true;
@@ -28,13 +39,25 @@ public class AICharacterVehicle : AICharacterControl
         currentWanderTarget = GetRandomWanderPosition(transform.position, wanderRange);
     }
 
-    protected virtual void LookTowards(Vector3 targetPosition)
+    protected virtual void LookPosition(Vector3 position)
     {
-        Vector3 direction = (targetPosition - transform.position).normalized;
-        Quaternion targetRotation = Quaternion.LookRotation(direction);
-        targetRotation.x = 0;
-        targetRotation.z = 0;
-        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
+        Vector3 dir = (position - transform.position).normalized;
+        Quaternion rot = Quaternion.LookRotation(dir);
+        transform.rotation = Quaternion.Lerp(transform.rotation, rot, Time.deltaTime * rotationSpeed);
+    }
+
+    public virtual void MoveToEnemy()
+    {
+        if (aiEye != null && aiEye.DetectedEnemy != null)
+        {
+            agent.stoppingDistance = ((AIEyeAttacker)aiEye).AttackRangeDataView.MaxDistance - thresholdDistance;
+
+            agent.speed = maxSpeed;
+
+            LookPosition(aiEye.DetectedEnemy.transform.position);
+
+            MoveToPosition(aiEye.DetectedEnemy.transform.position);
+        }
     }
 
     protected virtual void MoveToPosition(Vector3 targetPosition)
@@ -80,6 +103,8 @@ public class AICharacterVehicle : AICharacterControl
 
     public virtual void Wander()
     {
+        agent.speed = defaultSpeed;
+
         float distanceToTarget = Vector3.Distance(transform.position, currentWanderTarget);
 
         // Get new wander position if close to target or interval passed
@@ -92,6 +117,32 @@ public class AICharacterVehicle : AICharacterControl
         wanderTimer += Time.deltaTime;
         MoveToPosition(currentWanderTarget);
     }
+
+    public virtual void Evade()
+    {
+        // Verificar cooldown
+        if (Time.time - _lastEvadeTime < evadeCooldown)
+        {
+            return;
+        }
+
+        if (aiEye != null && aiEye.DetectedEnemy != null)
+        {
+            Vector3 evadeDirection = (transform.position - aiEye.DetectedEnemy.transform.position).normalized;
+
+            Vector3 evadeTarget = transform.position + evadeDirection * evadeDistance;
+
+            agent.speed = maxSpeed * evadeSpeedMultiplier;
+            agent.stoppingDistance = 0f;
+
+            MoveToPosition(evadeTarget);
+
+            _lastEvadeTime = Time.time;
+
+            Debug.Log($"Evadiendo de {aiEye.DetectedEnemy.gameObject.name}");
+        }
+    }
+
 
     protected virtual void OnDrawGizmos()
     {

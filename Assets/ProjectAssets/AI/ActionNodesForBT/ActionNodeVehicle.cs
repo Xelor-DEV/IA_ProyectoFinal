@@ -7,6 +7,6 @@ public class ActionNodeVehicle : ActionNode
     public override void OnStart()
     {
         base.OnStart();
-        aiCharacterVehicle = GetComponent<AICharacterVehicle>();
+        aiCharacterVehicle = gameObject.GetComponent<AICharacterVehicle>();
     }
 }

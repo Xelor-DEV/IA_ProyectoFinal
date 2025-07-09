@@ -15,19 +15,18 @@ public class AICharacterActionsTarr : AICharacterActionsHostileSlime
         base.LoadComponent();
     }
 
-    public void Attack()
+    public override void Attack()
     {
-
         if (FrameRate > Rate)
         {
             FrameRate = 0;
-            AIEyeTarrShortRange aiEyeTarrShortRange = ((AIEyeTarrShortRange)aiEye);
 
-            if (aiEyeTarrShortRange != null && aiEyeTarrShortRange.DetectedEnemy != null)
+            AIEyeAttacker aiEyeTarrShortRange = ((AIEyeAttacker)aiEye);
+            if (aiEyeTarrShortRange != null &&
+                aiEyeTarrShortRange.DetectedEnemy != null)
             {
                 aiEyeTarrShortRange.DetectedEnemy.TakeDamage(damage, health);
             }
-
         }
 
         FrameRate += Time.deltaTime;

@@ -28,26 +28,26 @@ public class AIEyeTarr : AIEyeHostileSlime
     {
         base.UpdateScan();
 
+        if (detectedEnemy == null)
+        {
+            attackRangeDataView.TargetInSight = false;
+            return;
+        }
+
         switch (linkedHealth.EntityGroup)
         {
-            case EntityGroup.Friendly_Slime:
+            case EntityGroup.Hostile_Slime:
                 if (detectedEnemy != null)
                 {
-                    if (detectedEnemy is FriendlySlimeHealth enemy)
+                    if (detectedEnemy is FriendlySlimeHealth enemySlime)
                     {
-                        attackRangeDataView.IsInSight(enemy.AimOffset);
+                        attackRangeDataView.IsInSight(enemySlime.AimOffset);
                     }
-                }
 
-                break;
-
-            case EntityGroup.Rancher:
-                if (detectedEnemy != null)
-                {
-                    if (detectedEnemy is RancherHealth enemy)
+                    if (detectedEnemy is RancherHealth enemyRancher)
                     {
-                        attackRangeDataView.IsInSight(enemy.AimOffset);
-                    }      
+                        attackRangeDataView.IsInSight(enemyRancher.AimOffset);
+                    }
                 }
                 break;
 

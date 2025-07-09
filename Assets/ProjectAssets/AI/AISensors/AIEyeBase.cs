@@ -1,8 +1,5 @@
 using UnityEngine;
 using System;
-using System.Collections;
-using UnityEditor;
-using UnityEngine.Playables;
 
 public class DataViewBase
 {
@@ -147,7 +144,7 @@ public class DataViewBase
         if (VisionMesh != null && Owner != null)
         {
             Gizmos.color = outOfSightColor;
-            Gizmos.DrawMesh(VisionMesh, Owner.transform.position, Owner.transform.rotation);
+            Gizmos.DrawMesh(VisionMesh, Owner.AimOffset.position, Owner.transform.rotation);
         }
     }
     #endregion
@@ -193,9 +190,10 @@ public class DataView : DataViewBase
 
     private bool ValidateHeight(Vector3 targetPos)
     {
-        return Mathf.Abs(targetPos.y - Owner.transform.position.y) <= VisionHeight;
+        Vector3 origin = Owner.AimOffset.position;
+        return Mathf.Abs(targetPos.y - origin.y) <= VisionHeight;
     }
-        
+
     private bool ValidateAngle(Vector3 direction)
     {
         float horizontalAngle = Vector3.Angle(direction.normalized, Owner.transform.forward);
@@ -204,7 +202,9 @@ public class DataView : DataViewBase
 
     private bool CheckOcclusion(Vector3 origin, Vector3 target)
     {
-        return Physics.Linecast(origin, target, occlusionLayers) && checkInsideObjects;
+        if (!checkInsideObjects) return false;
+
+        return Physics.Linecast(origin, target, occlusionLayers);
     }
     #endregion
 
@@ -213,17 +213,10 @@ public class DataView : DataViewBase
     {
         if (!drawGizmos) return;
 
-
         if (VisionMesh != null && Owner != null)
         {
-            if (TargetInSight)
-            {
-                Gizmos.color = inSightColor;
-            }
-            else
-                Gizmos.color = inSightColor;
-
-            Gizmos.DrawMesh(VisionMesh, Owner.transform.position, Owner.transform.rotation);
+            Gizmos.color = TargetInSight ? inSightColor : outOfSightColor; // Corregido
+            Gizmos.DrawMesh(VisionMesh, Owner.AimOffset.position, Owner.transform.rotation);
         }
     }
     #endregion
@@ -353,6 +346,7 @@ public class AIEyeBase : MonoBehaviour
         }
 
         mainVision.Owner = linkedHealth;
+        mainVision.Initialize();
         _scanTimer = 0;
         scanIntervals.InitializeBuffer();
     }
@@ -371,7 +365,7 @@ public class AIEyeBase : MonoBehaviour
 
         _scanTimer += Time.deltaTime;
 
-        if (detectedEnemy != null && ((detectedEnemy.IsDead) || (detectedEnemy.IsVisible)))
+        if (detectedEnemy != null && (detectedEnemy.IsDead || !detectedEnemy.IsVisible))
         {
             detectedEnemy = null;
         }
@@ -424,18 +418,21 @@ public class AIEyeBase : MonoBehaviour
     {
         if (IsAlly(target))
         {
-            detectedAlly = target;
-            return;
+            if (detectedAlly == null)
+            {
+                detectedAlly = target;
+            }
         }
-
-        float dist = (transform.position - target.transform.position).magnitude;
-        if (closestDistance > dist)
+        else
         {
-            detectedEnemy = target;
-            closestDistance = dist;
-
+            float dist = (transform.position - target.transform.position).magnitude;
+            if (dist < closestDistance)
+            {
+                detectedEnemy = target;
+                closestDistance = dist;
+            }
+            enemiesInView++;
         }
-        enemiesInView++;
     }
 
     protected virtual bool IsAlly(HealthManager target)

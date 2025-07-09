@@ -7,6 +7,6 @@ public class ActionNodeAction : ActionNode
     public override void OnStart()
     {
         base.OnStart();
-        aiCharacterAction = GetComponent<AICharacterAction>();
+        aiCharacterAction = gameObject.GetComponent<AICharacterAction>();
     }
 }
